@@ -81,6 +81,13 @@ void LogicalUnit<N>::advanceCycle() {
 template<size_t N, size_t M>
 void HashTable<N, M>::advanceCycle() {
   /* FIXME */
+  if(*_isWrite == 0b0){
+    *_output = _entries[_index->to_ullong()];
+  }
+  else{
+    _entries[_index->to_ullong()] = *_input;
+    _output->reset();
+  }
 }
 
 template<size_t N, size_t D>
