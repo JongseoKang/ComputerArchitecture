@@ -1,8 +1,9 @@
 #ifndef __ASSN1_STU_H__
 #define __ASSN1_STU_H__
-
+#include <iostream>
 #include "assn1.h"
 
+using namespace std;
 template<size_t N>
 void NANDGate<N>::advanceCycle() {
   /* FIXME */
@@ -93,6 +94,17 @@ void HashTable<N, M>::advanceCycle() {
 template<size_t N, size_t D>
 void DelayQueue<N, D>::advanceCycle() {
   /* FIXME */
+  *_output = _entries[D - 1];
+  for(int i = D - 1; i > 0; i--){
+    _entries[i] = _entries[i - 1];
+  }
+
+  if(*_isPush == 0b0){
+    _entries[0].reset();
+  }
+  else{
+    _entries[0] = *_input;
+  }
 }
 
 #endif
