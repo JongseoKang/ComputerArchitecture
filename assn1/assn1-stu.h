@@ -1,9 +1,7 @@
 #ifndef __ASSN1_STU_H__
 #define __ASSN1_STU_H__
-#include <iostream>
 #include "assn1.h"
 
-using namespace std;
 template<size_t N>
 void NANDGate<N>::advanceCycle() {
   /* FIXME */
