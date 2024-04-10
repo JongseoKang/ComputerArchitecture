@@ -19,8 +19,41 @@ calculateGCD:
 
 ################################################################################
 # FIXME
+  slt $t0, $a0, $a1
+  beq $t0, $zero, changeAB
+  move $t1, $a0
+  move $a0, $a1
+  move $a1, $t1
+changeAB:
 
-  nop
+  beq $a1, $zero, gotoReturn
+  addi $sp, $sp, -20
+  sw $ra, 16($sp)
+  sw $t1, 12($sp)
+  sw $t0, 8($sp)
+  sw $a1, 4($sp)
+  sw $a0, 0($sp)
+
+  divu $a0, $a1
+  move $a0, $a1
+  mfhi $a1
+
+  jal calculateGCD
+
+  lw $ra, 16($sp)
+  lw $t1, 12($sp)
+  lw $t0, 8($sp)
+  lw $a1, 4($sp)
+  lw $a0, 0($sp)
+  addi $sp, $sp, 20
+
+  jr Exit
+
+gotoReturn:
+  move $v0, $a0
+
+Exit:
+  add $v0, $v0, $zero
 
 # FIXME
 ################################################################################
