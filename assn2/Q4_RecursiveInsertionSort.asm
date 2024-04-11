@@ -119,7 +119,7 @@ recursiveInsertionSort:
   addi $t2, $zero, 4
   multu $t1, $t2
   mflo $t1
-  add $t1, $t1, $a1
+  addu $t1, $t1, $a1
   lw $t0, 0($t1)
 
   # unsigned int $t1 = j = 2;
@@ -133,8 +133,8 @@ recursiveInsertionSort:
   addi $t5, $zero, 4
   multu $t4, $t5
   mflo $t4
-  addu $t4, $t4, $a1
-  sw $t4, 0($t4)
+  addu $t5, $t4, $a1
+  lw $t4, 0($t5)
 
   slt $t3, $t0, $t4 # t3 == 1 where the condition matches
   bne $t2, $zero, Break
