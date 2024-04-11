@@ -154,12 +154,12 @@ binarySearch0:
   beq $t2, $zero, Left 
   
   # Right
-  move $t1, $t3
+  addi $t0, $t3, 1
   jr binarySearch0
 
   # Left 
   Left:
-  addi $t0, $t3, 1
+  move $t1, $t3
   jr binarySearch0
 
   Found:
