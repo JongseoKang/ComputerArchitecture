@@ -151,14 +151,14 @@ binarySearch0:
 
   beq $t5, $a2, Found
   slt $t2, $t5, $a2
-  beq $t2, $zero, Right
+  beq $t2, $zero, Left 
   
-  # Left
+  # Right
   move $t1, $t3
   jr binarySearch0
 
-  # Right
-  Right:
+  # Left 
+  Left:
   addi $t0, $t3, 1
   jr binarySearch0
 
