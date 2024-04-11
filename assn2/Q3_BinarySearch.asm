@@ -132,8 +132,37 @@ binarySearch0:
 
 ################################################################################
 # FIXME
+  slt $t2, $t0, $t1
+  beq $t2, $zero, Exit
+  # else
 
-  nop
+  # $t3 = k
+  add $t3, $t0, $t1
+  addi $t4, $zero, 2
+  divu $t3, $t4
+  mflo $t3
+
+  # $t5 = array[k]
+  addu $sp, $a1, $t3
+  lw $t5, $sp
+
+  beq $t5, $a2, Found
+  slt $t2, $t5, $a2
+  beq $t2, $zero, Right
+  
+  # Left
+  move $t1, $t5
+  jr binarySearch0
+
+  # Right
+  Right:
+  addi $t0, $t5, 1
+  jr binarySearch0
+
+  Found:
+  move $v0, $t3
+
+  Exit:
 
 # FIXME
 ################################################################################
