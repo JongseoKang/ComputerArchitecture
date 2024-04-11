@@ -141,15 +141,14 @@ recursiveInsertionSort:
   beq $t3, $zero, Break
 
   # array[N - j + 1] = array[N - j];
-  addi $t2, $a0, 1
+  move $t2, $a0
   subu $t2, $t2, $t1
   addi $t3, $zero, 4
   multu $t2, $t3
   mflo $t2
   addu $t2, $t2, $a1
-  addi $t3, $t2, -4
-  lw $t4, 0($t3)
-  sw $t4, 0($t2)
+  lw $t4, 0($t2)
+  sw $t4, 4($t2)
 
   # j++ }
   addi $t1, 1
