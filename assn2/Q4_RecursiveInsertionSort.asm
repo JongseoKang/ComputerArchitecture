@@ -105,8 +105,14 @@ recursiveInsertionSort:
   beq $a0, $zero, recursiveInsertionSort_exit
 
   # Else
+
+  # recursive function call
+  addi $sp, $sp, -4
+  sw $a0, 0($sp)
   addi $a0, $a0, -1
   jal recursiveInsertionSort
+  lw $a0, 0($sp)
+  addi $sp, $sp, 4
 
   # $t0 = x = array[N - 1];
   addi $t1, $a0, -1
@@ -127,7 +133,7 @@ recursiveInsertionSort:
   addi $t5, $zero, 4
   multu $t4, $t5
   mflo $t4
-  add $t4, $t4, $a1
+  addu $t4, $t4, $a1
   sw $t4, 0($t4)
 
   slt $t3, $t0, $t4 # t3 == 1 where the condition matches
