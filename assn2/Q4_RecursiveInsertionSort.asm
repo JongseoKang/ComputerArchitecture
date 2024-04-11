@@ -102,7 +102,62 @@ recursiveInsertionSort:
 ################################################################################
 # FIXME
 
-  nop
+  beq $a0, $zero, recursiveInsertionSort_exit
+
+  # Else
+  addi $a0, $a0, -1
+  jal recursiveInsertionSort
+
+  # $t0 = x = array[N - 1];
+  addi $t1, $a0, -1
+  addi $t2, $zero, 4
+  multu $t1, $t2
+  mflo $t1
+  add $t1, $t1, $a1
+  lw $t0, 0($t1)
+
+  # unsigned int $t1 = j = 2;
+  addi $t1, $zero, 2
+
+  # while (j <= N && array[N - j] > x) {
+  Loop:
+  slt $t2, $t1, $a0 # $t2 == 0 where the condition matches
+
+  subu $t4, $a0, $t1
+  addi $t5, $zero, 4
+  multu $t4, $t5
+  mflo $t4
+  add $t4, $t4, $a1
+  sw $t4, 0($t4)
+
+  slt $t3, $t0, $t4 # t3 == 1 where the condition matches
+  bne $t2, $zero, Break
+  beq $t3, $zero, Break
+
+  # array[N - j + 1] = array[N - j];
+  addi $t2, $a0, 1
+  subu $t2, $t2, $t1
+  addi $t3, $zero, 4
+  multu $t2, $t3
+  mflo $t2
+  add $t2, $t2, $a1
+  addi $t3, $t2, -4
+  lw $t4, 0($t3)
+  sw $t4, 0($t2)
+
+  # j++ }
+  addi $t1, 1
+  jr Loop
+
+  Break:
+  # array[N - j + 1] = x;
+  addi $t2, $a0, 1
+  subu $t2, $t2, $t1
+  addi $t3, $zero, 4
+  multu $t2, $t3
+  mflo $t2
+  add $t2, $t2, $a1
+  sw $t0, 0($t2)
 
 # FIXME
 ################################################################################
