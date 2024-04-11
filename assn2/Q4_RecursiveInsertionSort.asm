@@ -152,7 +152,7 @@ recursiveInsertionSort:
 
   # j++ }
   addi $t1, 1
-  jr Loop
+  j Loop
 
   Break:
   # array[N - j + 1] = x;
