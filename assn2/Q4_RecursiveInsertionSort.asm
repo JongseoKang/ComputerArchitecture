@@ -146,7 +146,7 @@ recursiveInsertionSort:
   addi $t3, $zero, 4
   multu $t2, $t3
   mflo $t2
-  add $t2, $t2, $a1
+  addu $t2, $t2, $a1
   addi $t3, $t2, -4
   lw $t4, 0($t3)
   sw $t4, 0($t2)
@@ -162,7 +162,7 @@ recursiveInsertionSort:
   addi $t3, $zero, 4
   multu $t2, $t3
   mflo $t2
-  add $t2, $t2, $a1
+  addu $t2, $t2, $a1
   sw $t0, 0($t2)
 
 # FIXME
