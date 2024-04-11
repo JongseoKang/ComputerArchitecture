@@ -146,7 +146,7 @@ binarySearch0:
   addi $t4, $zero, 4
   multu $t3, $t4
   mflo $t6
-  addi $t6, $a1, $t6
+  addu $t6, $a1, $t6
   lw $t5, 0($t6)
 
   beq $t5, $a2, Found
