@@ -146,7 +146,7 @@ binarySearch0:
   addi $t4, $zero, 4
   multu $t3, $t4
   mflo $t6
-  addu $t6, $a1, $t6
+  addi $t6, $a1, $t6
   lw $t5, 0($t6)
 
   beq $t5, $a2, Found
@@ -154,12 +154,12 @@ binarySearch0:
   beq $t2, $zero, Right
   
   # Left
-  move $t1, $t5
+  move $t1, $t3
   jr binarySearch0
 
   # Right
   Right:
-  addi $t0, $t5, 1
+  addi $t0, $t3, 1
   jr binarySearch0
 
   Found:
