@@ -144,7 +144,7 @@ binarySearch0:
 
   # $t5 = array[k]
   addi $t4, $zero, 4
-  muli $t3, $t4
+  mulu $t3, $t4
   mflo $t6
   addi $t6, $a1, $t6
   lw $t5, 0($t6)
