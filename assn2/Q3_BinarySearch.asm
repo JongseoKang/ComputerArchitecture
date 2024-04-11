@@ -143,8 +143,11 @@ binarySearch0:
   mflo $t3
 
   # $t5 = array[k]
-  subu $sp, $a1, $t3
-  lw $t5, 0($sp)
+  addi $t4, $zero, 4
+  muli $t3, $t4
+  mflo $t6
+  addi $t6, $a1, $t6
+  lw $t5, 0($t6)
 
   beq $t5, $a2, Found
   slt $t2, $t5, $a2
