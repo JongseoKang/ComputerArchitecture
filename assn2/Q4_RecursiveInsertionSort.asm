@@ -102,9 +102,9 @@ recursiveInsertionSort:
 ################################################################################
 # FIXME
 
-  sw $ra, 0($sp)
-  sw $s0, 4($sp)
-  sw $s1, 8($sp)
+  lw $ra, 0($sp)
+  lw $s0, 4($sp)
+  lw $s1, 8($sp)
   addi $sp, $sp, 12
   move $a0, $s0
   move $a1, $s1
