@@ -110,14 +110,8 @@ recursiveInsertionSort:
   # Else
 
   # recursive function call
-  addi $sp, $sp, -8
-  sw $a0, 0($sp)
-  sw $a1, 4($sp)
   addi $a0, $a0, -1
   jal recursiveInsertionSort
-  lw $a0, 0($sp)
-  lw $a1, 4($sp)
-  addi $sp, $sp, 8
 
   # $t0 = x = array[N - 1];
   addi $t1, $a0, -1
@@ -169,9 +163,6 @@ recursiveInsertionSort:
   addu $t2, $t2, $a1
   sw $t0, 0($t2)
 
-  # $s0 = $a0; $s1 = $a1
-  move $s0, $a0
-  move $s1, $a1
 # FIXME
 ################################################################################
 
