@@ -102,6 +102,13 @@ recursiveInsertionSort:
 ################################################################################
 # FIXME
 
+  sw $ra, 0($sp)
+  sw $s0, 4($sp)
+  sw $s1, 8($sp)
+  addi $sp, $sp, 12
+  move $a0, $s0
+  move $a1, $s1
+
   beq $a0, $zero, recursiveInsertionSort_exit
 
   # Else
