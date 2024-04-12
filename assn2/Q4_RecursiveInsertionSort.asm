@@ -110,16 +110,14 @@ recursiveInsertionSort:
   # Else
 
   # recursive function call
-  addi $sp, $sp, -12
+  addi $sp, $sp, -8
   sw $a0, 0($sp)
   sw $a1, 4($sp)
-  sw $ra, 8($sp)
   addi $a0, $a0, -1
   jal recursiveInsertionSort
   lw $a0, 0($sp)
   lw $a1, 4($sp)
-  lw $ra, 8($sp)
-  addi $sp, $sp, 12
+  addi $sp, $sp, 8
 
   # $t0 = x = array[N - 1];
   addi $t1, $a0, -1
