@@ -129,7 +129,7 @@ recursiveInsertionSort:
   addi $t1, $zero, 2
 
   # while (j <= N && array[N - j] > x) {
-  Loop:
+  whileLoop:
   slt $t2, $a0, $t1 # $t2 == 0 where the condition matches
 
   subu $t4, $a0, $t1
@@ -140,8 +140,8 @@ recursiveInsertionSort:
   lw $t4, 0($t5)
 
   slt $t3, $t0, $t4 # t3 == 1 where the condition matches
-  bne $t2, $zero, Break
-  beq $t3, $zero, Break
+  bne $t2, $zero, whileBreak
+  beq $t3, $zero, whileBreak
 
   # array[N - j + 1] = array[N - j];
   move $t2, $a0
@@ -155,9 +155,9 @@ recursiveInsertionSort:
 
   # j++ }
   addi $t1, 1
-  j Loop
+  j whileLoop
 
-  Break:
+  whileBreak:
   # array[N - j + 1] = x;
   addi $t2, $a0, 1
   subu $t2, $t2, $t1
