@@ -130,7 +130,7 @@ recursiveInsertionSort:
 
   # while (j <= N && array[N - j] > x) {
   Loop:
-  slt $t2, $t1, $a0 # $t2 == 0 where the condition matches
+  slt $t2, $a0, $t1 # $t2 == 0 where the condition matches
 
   subu $t4, $a0, $t1
   addi $t5, $zero, 4
