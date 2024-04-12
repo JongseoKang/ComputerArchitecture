@@ -47,8 +47,63 @@ compareStrings:
 
 ################################################################################
 # FIXME
+  # $t0 = strlen(A), $t1 = strlen(B)
+  move $t2, $a0
+  move $t0, $zero
+lenA:
+  lb $t3, 0($t2)
+  beq $t3, $zero, lenABreak
+  addi $t0, $t0, 1
+  addi $t2, $t2, 1
+  j lenA
+lenABreak:
 
-  nop
+  move $t2, $a1
+  move $t1, $zero
+lenB:
+  lb $t3, 0($t2)
+  beq $t3, $zero, lenBBreak
+  addi $t1, $t1, 1
+  addi $t2, $t2, 1
+  j lenB
+lenBBreak:
+
+  beq $t0, $t1, otherwise
+  slt $t2, $t0, $t1
+  beq $t2, $zero, ALarger
+BLarger:
+  addi $v0, $zero, -1
+  j compareStringsReturn
+
+ALarger:
+  addi $v0, $zero, 1
+  j compareStringsReturn
+
+otherwise:
+  move $v0, $zero
+  move $t2, $zero
+  move $t4, $a0
+  move $t5, $a1
+  addi $t9, $zero, 1
+
+compLoop:
+  slt $t3, $t2, $t0
+  beq $t3, $zero, compLoopBreak
+  lb $t6, 0($t4)
+  lb $t7, 0($t5)
+  
+  slt $t8, $t6, $t7
+  beq $t8, $t9, BLarger
+  slt $t8, $t7, $t6
+  beq $t8, $t9, ALarger
+
+  addi $t2, $t2, 1
+  addi $t4, $t4, 1
+  addi $t5, $t5, 1
+  j compLoop
+compLoopBreak:
+
+compareStringsReturn:
 
 # FIXME
 ################################################################################
