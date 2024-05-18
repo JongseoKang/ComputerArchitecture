@@ -28,7 +28,23 @@ class Control : public DigitalCircuit {
     }
 
     virtual void advanceCycle() {
-      /* FIXME */
+      unsigned long opcode = _iOpcode->to_ulong();
+
+      if(opcode == 0b000000){       // R type (add, sub, and, or, nor, slt)
+
+      }
+      else if(opcode == 0b100011){  // lw
+
+      }
+      else if(opcode == 0b101011){  // sw
+
+      }
+      else if(opcode == 0b000100){  // beq
+
+      }
+      else if(opcode == 0b001000){  // addi
+
+      }
     }
 
   private:
