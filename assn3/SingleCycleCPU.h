@@ -27,6 +27,10 @@ class MUX : public DigitalCircuit {
 
     virtual void advanceCycle() {
       /* FIXME */
+      if(_iSelect->test(0))
+        *_oOutput = *_iInput1;
+      else
+        *_oOutput = *_iInput0;
     }
 
   private:
@@ -55,6 +59,19 @@ class SingleCycleCPU : public DigitalCircuit {
       _PC = initialPC;
 
       /* FIXME: setup various sequential/combinational circuits and wires as needed */
+
+      delete _instMemory;
+      delete _registerFile;
+      delete _dataMemory;
+
+      delete _control;
+      delete _aluControl;
+      delete _alu;
+      delete _muxRegFileWriteRegister;
+      delete _muxALUInput1;
+      delete _muxRegFileWriteData;
+      delete _muxPC;
+
     }
 
     void printPVS() {
