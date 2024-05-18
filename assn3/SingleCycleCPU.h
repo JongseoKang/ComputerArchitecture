@@ -60,18 +60,39 @@ class SingleCycleCPU : public DigitalCircuit {
 
       /* FIXME: setup various sequential/combinational circuits and wires as needed */
 
-      delete _instMemory;
-      delete _registerFile;
-      delete _dataMemory;
+      _instMemory = new Memory("instMemory", 
+        &_PC, &_PC, &_alwaysHi, &_alwaysLo, &_instMemInstruction, 
+        Memory::LittleEndian, instMemFileName);
 
-      delete _control;
-      delete _aluControl;
-      delete _alu;
-      delete _muxRegFileWriteRegister;
-      delete _muxALUInput1;
-      delete _muxRegFileWriteData;
-      delete _muxPC;
+      _muxRegFileWriteRegister = new MUX<5>("muxRegFileWriteRegister", 
+        &_muxRegFileWriteRegisterInput0, &_muxRegFileWriteRegisterInput1, 
+        &_ctrlRegDst, &_muxRegFileWriteRegisterOutput);
+      
+      _muxRegFileWriteData = new MUX<32>("muxRegFileWriteData",
+        &_aluResult, &_dataMemReadData, &_ctrlMemToReg, &_regFileWriteData);
 
+      _registerFile = new RegisterFile(&_regFileReadRegister1, 
+        &_regFileReadRegister2, &_muxRegFileWriteRegisterOutput, &_regFileWriteData, 
+        &_ctrlRegWrite, &_regFileReadData1, &_regFileReadData2, regFileName);
+
+      _muxALUInput1 = new MUX<32>("muxALUInput1", 
+        &_regFileReadData2, &_signExtendOutput,
+        &_ctrlALUSrc, &_muxALUInput1Output);
+
+      _alu = new ALU(&_aluCtrlOp, &_regFileReadData1, &_muxALUInput1Output,
+        &_aluResult, &_aluZero);
+
+      _dataMemory = new Memory("dataMemory", &_aluResult, 
+        &_regFileReadData2, &_ctrlMemRead, &_ctrlMemWrite,
+        &_dataMemReadData, Memory::LittleEndian, dataMemFileName);
+
+      _control = new Control(&_ctrlOpcode, &_ctrlRegDst, &_ctrlALUSrc, 
+        &_ctrlMemToReg, &_ctrlRegWrite, &_ctrlMemRead, &_ctrlMemWrite,
+        &_ctrlBranch, &_ctrlALUOp);
+
+      _aluControl = new ALUControl(&_ctrlALUOp, &_aluCtrlFunct, &_aluCtrlOp);
+      
+      _muxPC = new MUX<32>("muxPC", &_muxPCInput0, &_muxPCInput1, &_muxPCSelect, &_PC);
     }
 
     void printPVS() {
@@ -89,6 +110,69 @@ class SingleCycleCPU : public DigitalCircuit {
       _currCycle += 1;
 
       /* FIXME: implement the single-cycle behavior of the single-cycle MIPS CPU */
+
+      // instruction fetch
+      _instMemory->advanceCycle();
+
+
+      // instruction decode
+      std::string instruction = _instMemInstruction.to_string();
+      _ctrlOpcode = Wire<6>(instruction.substr(0, 6));
+      _regFileReadRegister1 = Wire<5>(instruction.substr(6, 5));
+      _regFileReadRegister2 = _muxRegFileWriteRegisterInput0 = Wire<5>(instruction.substr(11, 5));
+      _muxRegFileWriteRegisterInput1 = Wire<5>(instruction.substr(16, 5));
+      _signExtendInput = Wire<16>(instruction.substr(16, 16));
+      _aluCtrlFunct = Wire<6>(instruction.substr(26, 6));
+
+
+      // register file virtual subcycle
+      _ctrlRegWrite.reset();
+      _registerFile->advanceCycle();      // one more time after mem load
+
+      // control unit
+      _control->advanceCycle();
+      _muxRegFileWriteRegister->advanceCycle();
+
+
+      // alu control
+      _aluControl->advanceCycle();
+
+      // alu
+      _signExtendOutput = Wire<32>(_signExtendInput.to_ulong());
+      _muxALUInput1->advanceCycle();
+      _alu->advanceCycle();
+
+      // data memory
+      _dataMemory->advanceCycle();
+      _muxRegFileWriteData->advanceCycle();
+
+      // fed data to write register
+      _registerFile->advanceCycle();
+
+      // determine value of PC
+      for (int tmp = 1, i = 2; i < 32; i++)
+      {
+        if (_PC.test(i))
+          tmp++;
+        _PC.set(i, (tmp % 2) == 1 ? true : false);
+        tmp /= 2;
+      }
+      _muxPCInput0 = _PC;
+      
+      _signExtendOutput <<= 2;
+      for (int tmp = 0, i = 0; i < 32; i++)
+      {
+        if (_PC.test(i))
+          tmp++;
+        if(_signExtendOutput.test(i))
+          tmp++;
+        _PC.set(i, (tmp % 2) == 1 ? true : false);
+        tmp /= 2;
+      }
+
+      _muxPCInput1 = _PC;
+      _muxPCSelect = _ctrlBranch & _aluZero;
+      _muxPC->advanceCycle();
     }
 
     ~SingleCycleCPU() {

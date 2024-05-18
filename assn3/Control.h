@@ -82,7 +82,7 @@ class Control : public DigitalCircuit {
         _oMemRead->reset();   //
         _oMemWrite->reset();  //
         _oBranch->reset();    //
-        _oALUOp->set(1);      //
+        _oALUOp->reset(1);      //
         _oALUOp->reset(0);    //
       }
     }
