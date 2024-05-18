@@ -76,6 +76,48 @@ class Memory : public DigitalCircuit {
 
     virtual void advanceCycle() {
       /* FIXME */
+      unsigned long memAddr = _iAddress->to_ulong();
+      std::string dataStr(""), str0, str1, str2, str3;
+      
+      if(_iMemRead->test(0)){
+        str0 = _memory[memAddr].to_string();
+        str1 = _memory[memAddr + 1].to_string();
+        str2 = _memory[memAddr + 2].to_string();
+        str3 = _memory[memAddr + 3].to_string();
+
+        if(_endianness == LittleEndian){
+          dataStr.append(str3);
+          dataStr.append(str2);
+          dataStr.append(str1);
+          dataStr.append(str0);
+        }
+        else if(_endianness == BigEndian){
+          dataStr.append(str0);
+          dataStr.append(str1);
+          dataStr.append(str2);
+          dataStr.append(str3);
+        }
+        *_oReadData = Wire<32>(dataStr);
+      }
+      if(_iMemWrite->test(0)){
+        dataStr = _iWriteData->to_string();
+        if(_endianness == LittleEndian){
+          str0 = dataStr.substr(0, 8);
+          str1 = dataStr.substr(8, 8);
+          str2 = dataStr.substr(16, 8);
+          str3 = dataStr.substr(24, 8);     
+        }
+        else if(_endianness == BigEndian){
+          str3 = dataStr.substr(0, 8);
+          str2 = dataStr.substr(8, 8);
+          str1 = dataStr.substr(16, 8);
+          str0 = dataStr.substr(24, 8);     
+        }
+        _memory[memAddr] = std::bitset<8>(str3);
+        _memory[memAddr + 1] = std::bitset<8>(str2);
+        _memory[memAddr + 2] = std::bitset<8>(str1);
+        _memory[memAddr + 3] = std::bitset<8>(str0);
+      }
     }
 
     ~Memory() {
