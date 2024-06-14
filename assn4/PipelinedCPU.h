@@ -97,12 +97,76 @@ class PipelinedCPU : public DigitalCircuit {
       const char *dataMemFileName
     ) : DigitalCircuit(name) {
       /* FIXME */
+      _instMemory = new Memory("instMemory", 
+        &_PC, &_PC, &_alwaysHi, &_alwaysLo, &_latchIFID.instruction, 
+        Memory::LittleEndian, instMemFileName);
+
+      _adderPCPlus4Input1 = Wire<32>(4);
+      _adderPCPlus4 = new Adder<32>("adderPCPlus4", &_PC, &_adderPCPlus4Input1, &_pcPlus4);
+
+      _muxMemToReg = new MUX2<32>("muxMemToReg", &_latchMEMWB.dataMemReadData, &_latchMEMWB.aluResult,
+      &_latchMEMWB.ctrlWB.memToReg, &_muxMemToRegOutput);
+
+      _muxRegDst = new MUX2<5>("muxRegDst", &_latchIDEX.rt, &_latchIDEX.rd, 
+        &_latchIDEX.ctrlEX.regDst, &_latchEXMEM.regDstIdx);
+
+      _registerFile = new RegisterFile(&_regFileReadRegister1, 
+        &_regFileReadRegister2, &_latchMEMWB.regDstIdx, &_muxMemToRegOutput, 
+        &_latchMEMWB.ctrlWB.regWrite, &_latchIDEX.regFileReadData1, &_latchIDEX.regFileReadData2, regFileName);
+
+      _muxALUSrc = new MUX2<32>("muxALUSrc", 
+        &_latchIDEX.regFileReadData2, &_latchIDEX.signExtImmediate,
+        &_latchIDEX.ctrlEX.aluSrc, &_muxALUSrcOutput);
+
+      _alu = new ALU(&_aluControlOutput, &_latchIDEX.regFileReadData1, &_muxALUSrcOutput,
+        &_latchEXMEM.aluResult, &_latchEXMEM.aluZero);
+
+      _dataMemory = new Memory("dataMemory", &_latchEXMEM.aluResult, 
+        &_latchEXMEM.regFileReadData2, &_latchEXMEM.ctrlMEM.memRead, &_latchEXMEM.ctrlMEM.memWrite,
+        &_latchMEMWB.dataMemReadData, Memory::LittleEndian, dataMemFileName);
+
+      _control = new Control(&_opcode, &_latchIDEX.ctrlEX.regDst, &_latchIDEX.ctrlEX.aluSrc, 
+        &_latchMEMWB.ctrlWB.memToReg, &_latchMEMWB.ctrlWB.regWrite, &_latchEXMEM.ctrlMEM.memRead,
+        &_latchEXMEM.ctrlMEM.memWrite, &_latchEXMEM.ctrlMEM.branch, &_latchIDEX.ctrlEX.aluOp);
+
+      _aluControl = new ALUControl(&_latchIDEX.ctrlEX.aluOp, &_aluControlInput, &_aluControlOutput);
+      
+      _muxPCSrc = new MUX2<32>("muxPCSrc", &_pcPlus4, &_latchEXMEM.branchTargetAddr, &_muxPCSrcSelect, &_PC);
+
+      
     }
 
     virtual void advanceCycle() {
       _currCycle += 1;
 
       /* FIXME: implement the per-cycle behavior of the five-stage pipelined MIPS CPU */
+
+      // WB
+      _muxMemToReg->advanceCycle();
+      if(_latchMEMWB.ctrlWB.regWrite.test(0)) _registerFile->advanceCycle();    // if has to write
+
+      // MEM
+      _muxPCSrcSelect = _latchEXMEM.ctrlMEM.branch & _latchEXMEM.aluZero;
+      _dataMemory->advanceCycle();
+
+      // EX
+
+
+
+      // ID
+
+
+
+      // IF
+
+
+
+      // PC
+
+
+
+
+
     }
 
     ~PipelinedCPU() {
