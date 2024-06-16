@@ -101,10 +101,14 @@ class PipelinedCPU : public DigitalCircuit {
         &_PC, &_PC, &_alwaysHi, &_alwaysLo, &_latchIFID.instruction, 
         Memory::LittleEndian, instMemFileName);
 
+      _PC = Register<32>(initialPC);
+      
       _adderPCPlus4Input1 = Wire<32>(4);
       _adderPCPlus4 = new Adder<32>("adderPCPlus4", &_PC, &_adderPCPlus4Input1, &_pcPlus4);
+      _adderPCPlus4->advanceCycle();
+      _latchIFID.pcPlus4 = _pcPlus4;
 
-      _muxMemToReg = new MUX2<32>("muxMemToReg", &_latchMEMWB.dataMemReadData, &_latchMEMWB.aluResult,
+      _muxMemToReg = new MUX2<32>("muxMemToReg", &_latchMEMWB.aluResult, &_latchMEMWB.dataMemReadData,
       &_latchMEMWB.ctrlWB.memToReg, &_muxMemToRegOutput);
 
       _muxRegDst = new MUX2<5>("muxRegDst", &_latchIDEX.rt, &_latchIDEX.rd, 
@@ -126,14 +130,16 @@ class PipelinedCPU : public DigitalCircuit {
         &_latchMEMWB.dataMemReadData, Memory::LittleEndian, dataMemFileName);
 
       _control = new Control(&_opcode, &_latchIDEX.ctrlEX.regDst, &_latchIDEX.ctrlEX.aluSrc, 
-        &_latchMEMWB.ctrlWB.memToReg, &_latchMEMWB.ctrlWB.regWrite, &_latchEXMEM.ctrlMEM.memRead,
-        &_latchEXMEM.ctrlMEM.memWrite, &_latchEXMEM.ctrlMEM.branch, &_latchIDEX.ctrlEX.aluOp);
+        &_latchIDEX.ctrlWB.memToReg, &_latchIDEX.ctrlWB.regWrite, &_latchIDEX.ctrlMEM.memRead,
+        &_latchIDEX.ctrlMEM.memWrite, &_latchIDEX.ctrlMEM.branch, &_latchIDEX.ctrlEX.aluOp);
 
       _aluControl = new ALUControl(&_latchIDEX.ctrlEX.aluOp, &_aluControlInput, &_aluControlOutput);
       
       _muxPCSrc = new MUX2<32>("muxPCSrc", &_pcPlus4, &_latchEXMEM.branchTargetAddr, &_muxPCSrcSelect, &_PC);
 
-      
+      _signExtend = new SignExtend<16,32>("signExtend", &_signExtendInput, &_latchIDEX.signExtImmediate);
+      _adderBranchTargetAddr = new Adder<32>("adderBranchTargetAddr", &_latchIDEX.pcPlus4, 
+        &_adderBranchTargetAddrInput1, &_latchEXMEM.branchTargetAddr);
     }
 
     virtual void advanceCycle() {
@@ -147,21 +153,53 @@ class PipelinedCPU : public DigitalCircuit {
 
       // MEM
       _muxPCSrcSelect = _latchEXMEM.ctrlMEM.branch & _latchEXMEM.aluZero;
+      _muxPCSrc->advanceCycle();
       _dataMemory->advanceCycle();
 
+
+      _latchMEMWB.ctrlWB = _latchEXMEM.ctrlWB;
+      _latchMEMWB.aluResult = _latchEXMEM.aluResult;
+      _latchMEMWB.regDstIdx = _latchEXMEM.regDstIdx;
+
+
       // EX
+      _muxALUSrc->advanceCycle();
+      _muxRegDst->advanceCycle();
 
+      _aluControlInput = Wire<6>(_latchIDEX.signExtImmediate.to_ulong() & ((1 << 6) - 1));
+      _aluControl->advanceCycle();
+      _alu->advanceCycle();
 
+      _adderBranchTargetAddrInput1 = _latchIDEX.signExtImmediate.to_ulong() << 2;
+      _adderBranchTargetAddr->advanceCycle();
+
+      _latchEXMEM.ctrlMEM = _latchIDEX.ctrlMEM;
+      _latchEXMEM.ctrlWB = _latchIDEX.ctrlWB;
+      _latchEXMEM.regFileReadData2 = _latchIDEX.regFileReadData2;
 
       // ID
+      _latchIDEX.pcPlus4 = _latchIFID.pcPlus4;
+      _opcode = Wire<6>(_latchIFID.instruction.to_string().substr(0, 6));
+      _regFileReadRegister1 = Wire<5>(_latchIFID.instruction.to_string().substr(6, 5));
+      _regFileReadRegister2 = Wire<5>(_latchIFID.instruction.to_string().substr(11, 5));
 
+      _signExtendInput = Wire<16>(_latchIFID.instruction.to_string().substr(16, 16));
+      _signExtend->advanceCycle();
 
+      _latchIDEX.rt = Wire<5>(_latchIFID.instruction.to_string().substr(11, 5));
+      _latchIDEX.rd = Wire<5>(_latchIFID.instruction.to_string().substr(16, 5));
 
+      _control->advanceCycle();
+
+      Register<1> regBuf = _latchMEMWB.ctrlWB.regWrite;
+      _latchMEMWB.ctrlWB.regWrite.reset(0);
+      _registerFile->advanceCycle();
+      _latchMEMWB.ctrlWB.regWrite = regBuf;
       // IF
+      _adderPCPlus4->advanceCycle();
+      _latchIFID.pcPlus4 = _pcPlus4;
+      _instMemory->advanceCycle();
 
-
-
-      // PC
 
 
 
